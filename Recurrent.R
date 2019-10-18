@@ -1,4 +1,4 @@
-myData <- read.csv("C:/Users/beaston/Desktop/R/variable-dosing_7119.csv", header = TRUE)
+myData <- read.csv("variable-dosing_7119.csv", header = TRUE)
 myData <- myData[myData$Reason.for.dropping != "None",]
 qty <- aggregate(myData$Qty, by=list(Category=myData$Arm.Group.Title), FUN=sum)
 numpeople <- aggregate(myData$X..People, by=list(Category=myData$Arm.Group.Title), FUN=median)

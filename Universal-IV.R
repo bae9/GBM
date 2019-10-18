@@ -1,5 +1,5 @@
 #Input data & filter out non-dropouts
-myData <- read.csv("C:/Users/beaston/Desktop/R/variable-dosing_7119.csv", header = TRUE)
+myData <- read.csv("variable-dosing_7119.csv", header = TRUE)
 myData <- myData[myData$Reason.for.dropping != "None",]
 
 #sum up by arm
