@@ -1,0 +1,52 @@
+---
+title: "GBM Patient Journey"
+author: "Blake Easton"
+date: "10/18/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Dropout Rate by Recurrence
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r data-prep}
+myData <- read.csv("variable-dosing_7119.csv", header = TRUE)
+myData <- myData[myData$Reason.for.dropping != "None",]
+```
+
+```{r dropout-vs-recurrence, fig.height=5, fig.cap="**TODO:** Write the figure caption here."}
+qty <- aggregate(myData$Qty, by=list(Category=myData$Arm.Group.Title), FUN=sum)
+numpeople <- aggregate(myData$X..People, by=list(Category=myData$Arm.Group.Title), FUN=median)
+cat <- aggregate(myData$Recurrent, by=list(Category=myData$Arm.Group.Title), FUN=mean)
+df <- data.frame(qty, numpeople, cat)
+bxp <- boxplot(df$x/df$x.1 ~ as.logical(df$x.2), data=myData,horizontal=TRUE, ylab="Recurrent Patient", xlab="% Patient Dropout")
+text(x=0.2, y=1, labels=toString(round(bxp$stats[3,1] * 100, digits=2)))
+text(x=0.2, y=2, labels=toString(round(bxp$stats[3,2] * 100, digits=2)))
+title(paste("% Patient Dropout rate by Recurrence \n n=", sum(numpeople$x), sep=""))
+
+```
+
+## Universal IV
+
+```{r universal-IV, fig.height=5, fig.cap="**TODO:** Caption figure."}
+#sum up by arm
+qty <- aggregate(myData$Qty, by=list(Category=myData$Arm.Group.Title), FUN=sum)
+numpeople <- aggregate(myData$X..People, by=list(Category=myData$Arm.Group.Title), FUN=median)
+cat <- aggregate(myData$Universal.IV, by=list(Category=myData$Arm.Group.Title), FUN=mean)
+
+#build boxplot
+df <- data.frame(qty, numpeople, cat)
+bxp <- boxplot(df$x/df$x.1 ~ as.logical(df$x.2), data=myData,horizontal=TRUE, ylab="Use of IV", xlab="% Patient Dropout")
+
+#add text
+text(x=0.1, y=1, labels=toString(round(bxp$stats[3,1] * 100, digits=2)))
+text(x=0.2, y=2, labels=toString(round(bxp$stats[3,2] * 100, digits=2)))
+title(paste("% Patient Dropout rate by use of Universal IV \n n=", sum(numpeople$x), sep=""))
+
+```
