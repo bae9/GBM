@@ -6,6 +6,11 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+library(Hmisc)
+library(tidyverse)
+library(readxl)
+library(knitr)
+library(kableExtra)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -16,8 +21,39 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r data-prep}
+path <- "variable-dosing_7119.xlsx"
+studies <- read_excel(path, sheet="Studies")
+arms <- read_excel(path, sheet="Arms")
+dropout <- read_excel(path, sheet="Dropout")
+
+studies <- studies %>%
+  mutate(NCT = as.factor(NCT))
+
+arms <- arms %>%
+  mutate(NCT = as.factor(NCT)
+        ,Arm = as.factor(Arm)
+        ) %>%
+  rename(Neoadjuvant = Neo) # rename not necessary; just showing how to do it
+
+dropout <- dropout %>%
+  mutate(NCT = as.factor(NCT)
+        ,Arm = as.factor(Arm)
+        ,Reason = as.factor(Reason)
+        )
+
 myData <- read.csv("variable-dosing_7119.csv", header = TRUE)
 myData <- myData[myData$Reason.for.dropping != "None",]
+```
+
+```{r integrity-checks}
+# TODO: Try running these 'by hand' in the console.
+# TODO: See https://en.wikipedia.org/wiki/Assertion_(software_development)
+stopifnot(nlevels(dropout$Arm) == nlevels(arms$Arm)) # TODO: this assertion fail
+duped <- dropout %>%
+  group_by(Arm) %>%
+  summarize(duped = length(unique(NCT)) > 1)
+arm_names_unique <- all(!duped$duped)
+stopifnot(all(!duped$duped))
 ```
 
 ```{r dropout-vs-recurrence, fig.height=5, fig.cap="**TODO:** Write the figure caption here."}
