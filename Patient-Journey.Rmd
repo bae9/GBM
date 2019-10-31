@@ -16,11 +16,7 @@ library(magrittr)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Dropout Rate by Recurrence
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Data Prep
 
 ```{r data-prep}
 path <- "variable-dosing_7119.xlsx"
@@ -42,7 +38,7 @@ dropout <- dropout %>%
         ,Reason = as.factor(Reason)
         )
 
-dropout = dropout[dropout$Reason != "None",]
+dropout <- dropout[dropout$Reason != "None",]
 dropoutsum <- dropout %>%
   group_by(NCT, Arm) %>%
     summarize(Sum = sum(Dropouts, na.rm=FALSE))
@@ -51,6 +47,7 @@ myData <- read.csv("variable-dosing_7119.csv", header = TRUE)
 myData <- myData[myData$Reason.for.dropping != "None",]
 ```
 
+## Integrity Checks
 ```{r integrity-checks}
 # TODO: Try running these 'by hand' in the console.
 # TODO: See https://en.wikipedia.org/wiki/Assertion_(software_development)
