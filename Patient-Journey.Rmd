@@ -84,6 +84,10 @@ title(paste("% Patient Dropout rate by use of Universal IV \n n=", sum(numpeople
 df_sum <- data.frame(dropoutsum$Arm, dropoutsum$Sum)
 df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$Recurrent)
 combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
-boxplot(combo$dropoutsum.Sum / combo$arms.Enrollment ~ combo$arms.Recurrent, horizontal=TRUE, ylab="Recurrent Patient", xlab="% Patient Dropout")
-title(paste("% Patient Dropout rate by Recurrence \n n=", sum(numpeople$x), sep=""))
+
+bp <- boxplot(combo$dropoutsum.Sum / combo$arms.Enrollment ~ combo$arms.Recurrent, horizontal=TRUE, ylab="Recurrent Patient", xlab="% Patient Dropout")
+
+title(paste("% Patient Dropout rate by Recurrence \n n=", sum(df_arm$arms.Enrollment), sep=""))
+text(x=0.11, y=1, labels=toString(round(bp$stats[3,1] * 100, digits=2)))
+text(x=0.06, y=2, labels=toString(round(bp$stats[3,2] * 100, digits=2)))
 ```
