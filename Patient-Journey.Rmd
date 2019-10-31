@@ -11,6 +11,8 @@ library(tidyverse)
 library(readxl)
 library(knitr)
 library(kableExtra)
+library(dplyr)
+library(magrittr)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -32,8 +34,7 @@ studies <- studies %>%
 arms <- arms %>%
   mutate(NCT = as.factor(NCT)
         ,Arm = as.factor(Arm)
-        ) %>%
-  rename(Neoadjuvant = Neo) # rename not necessary; just showing how to do it
+        )
 
 dropout <- dropout %>%
   mutate(NCT = as.factor(NCT)
@@ -48,7 +49,7 @@ myData <- myData[myData$Reason.for.dropping != "None",]
 ```{r integrity-checks}
 # TODO: Try running these 'by hand' in the console.
 # TODO: See https://en.wikipedia.org/wiki/Assertion_(software_development)
-stopifnot(nlevels(dropout$Arm) == nlevels(arms$Arm)) # TODO: this assertion fail
+stopifnot(nlevels(dropout$Arm) == nlevels(arms$Arm))
 duped <- dropout %>%
   group_by(Arm) %>%
   summarize(duped = length(unique(NCT)) > 1)
@@ -84,5 +85,16 @@ bxp <- boxplot(df$x/df$x.1 ~ as.logical(df$x.2), data=myData,horizontal=TRUE, yl
 text(x=0.1, y=1, labels=toString(round(bxp$stats[3,1] * 100, digits=2)))
 text(x=0.2, y=2, labels=toString(round(bxp$stats[3,2] * 100, digits=2)))
 title(paste("% Patient Dropout rate by use of Universal IV \n n=", sum(numpeople$x), sep=""))
+
+```
+
+##Test Area
+
+```{r Test Area}
+dropoutsum <- dropout %>%
+  group_by(NCT, Arm) %>%
+    filter(Reason != "None") %>%
+     summarize(total = sum(Dropouts, na.rm=FALSE))
+
 
 ```
