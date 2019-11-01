@@ -42,9 +42,6 @@ dropout <- dropout[dropout$Reason != "None",]
 dropoutsum <- dropout %>%
   group_by(NCT, Arm) %>%
     summarize(Sum = sum(Dropouts, na.rm=FALSE))
-
-myData <- read.csv("variable-dosing_7119.csv", header = TRUE)
-myData <- myData[myData$Reason.for.dropping != "None",]
 ```
 
 ## Integrity Checks
@@ -62,19 +59,17 @@ stopifnot(all(!duped$duped))
 ## Universal IV
 
 ```{r universal-IV, fig.height=5, fig.cap="**TODO:** Caption figure."}
-#sum up by arm
-qty <- aggregate(myData$Qty, by=list(Category=myData$Arm.Group.Title), FUN=sum)
-numpeople <- aggregate(myData$X..People, by=list(Category=myData$Arm.Group.Title), FUN=median)
-cat <- aggregate(myData$Universal.IV, by=list(Category=myData$Arm.Group.Title), FUN=mean)
+df_sum <- data.frame(dropoutsum$Arm, dropoutsum$Sum)
+df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$`Universal IV`)
+combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
 
-#build boxplot
-df <- data.frame(qty, numpeople, cat)
-bxp <- boxplot(df$x/df$x.1 ~ as.logical(df$x.2), data=myData,horizontal=TRUE, ylab="Use of IV", xlab="% Patient Dropout")
+bp <- boxplot(combo$dropoutsum.Sum / combo$arms.Enrollment ~ combo$arms..Universal.IV., horizontal=TRUE, ylab="Use of IV", xlab="% Patient Dropout")
+stripchart(combo$dropoutsum.Sum / combo$arms.Enrollment ~ combo$arms..Universal.IV., add=TRUE, col='RED', method='jitter')
 
 #add text
-text(x=0.1, y=1, labels=toString(round(bxp$stats[3,1] * 100, digits=2)))
+text(x=0.08, y=1, labels=toString(round(bxp$stats[3,1] * 100, digits=2)))
 text(x=0.2, y=2, labels=toString(round(bxp$stats[3,2] * 100, digits=2)))
-title(paste("% Patient Dropout rate by use of Universal IV \n n=", sum(numpeople$x), sep=""))
+title(paste("% Patient Dropout rate by use of Universal IV \n n=", sum(combo$arms.Enrollment), sep=""))
 
 ```
 
@@ -86,10 +81,11 @@ df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$Recurrent)
 combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
 
 bp <- boxplot(combo$dropoutsum.Sum / combo$arms.Enrollment ~ combo$arms.Recurrent, horizontal=TRUE, ylab="Recurrent Patient", xlab="% Patient Dropout")
+stripchart(combo$dropoutsum.Sum / combo$arms.Enrollment ~ combo$arms.Recurrent, add=TRUE, col='RED', method="jitter")
 
 title(paste("% Patient Dropout rate by Recurrence \n n=", sum(df_arm$arms.Enrollment), sep=""))
-text(x=0.11, y=1, labels=toString(round(bp$stats[3,1] * 100, digits=2)))
-text(x=0.06, y=2, labels=toString(round(bp$stats[3,2] * 100, digits=2)))
+text(x=0.15, y=1, labels=toString(round(bp$stats[3,1] * 100, digits=2)))
+text(x=0.15, y=2, labels=toString(round(bp$stats[3,2] * 100, digits=2)))
 ```
 
 ```{r IV-2, fig.height=5, fig.cap="TODO: Caption this figure."}
