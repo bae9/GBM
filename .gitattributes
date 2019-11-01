@@ -1,0 +1,7 @@
+# Set the default behavior for those without core.autocrlf set
+* text=auto
+
+# Declare text files to be normalized and converted to native
+# line endings on checkout
+*.Rmd text
+*.R text
