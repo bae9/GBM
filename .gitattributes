@@ -1,7 +1,23 @@
-# Set the default behavior for those without core.autocrlf set
+# Thanks to Alex Karatarakis for initial template; see
+# https://github.com/alexkaratarakis/gitattributes/blob/master/R.gitattributes
+# For an extended discussion of the .gitattributes 'New System'
+# see this post by Tim Clem:
+# https://adaptivepatchwork.com/2012/03/01/mind-the-end-of-your-line/
+# ---
+# Per Tim Clem's advice above, set the default behavior (normalize all
+# line endings CRLF-->LF) at the TOP of this file, so that later lines
+# may override it if necessary.
 * text=auto
 
-# Declare text files to be normalized and converted to native
-# line endings on checkout
-*.Rmd text
-*.R text
+# Basic .gitattributes for a R repo.
+
+# Source files
+# ============
+*.Rdata text
+*.rdb   binary
+*.rds   binary
+*.Rd    text
+*.Rdx   binary
+*.Rmd	text
+*.R  	text
+
