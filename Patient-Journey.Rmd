@@ -74,6 +74,11 @@ title(paste("% Patient Dropout rate by use of Universal IV \n n=", sum(dropout$D
 ```
 
 
+<!--
+This is just a trivial addition by DCN, to check whether we've
+got the CRLF-vs-CR issue sorted out. Also, it demonstrates the
+syntax for a comment outside of a code chunk.
+-->
 
 ```{r IV-2, fig.height=5, fig.cap="TODO: Caption this figure."}
 # Demonstrating a customary pattern of statistical work,
