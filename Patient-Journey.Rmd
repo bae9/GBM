@@ -67,11 +67,12 @@ bp <- boxplot(combo$dropoutsum.Sum / combo$arms.Enrollment ~ combo$arms..Univers
 stripchart(combo$dropoutsum.Sum / combo$arms.Enrollment ~ combo$arms..Universal.IV., add=TRUE, col='RED', method='jitter', pch=20)
 
 #add text
-#text(x=0.08, y=1, labels=toString(round(bxp$stats[3,1] * 100, digits=2)))
-#text(x=0.2, y=2, labels=toString(round(bxp$stats[3,2] * 100, digits=2)))
-title(paste("% Patient Dropout rate by use of Universal IV \n n=", sum(combo$arms.Enrollment), sep=""))
+text(x=0.1, y=1, labels=toString(round(bp$stats[3,1] * 100, digits=2)))
+text(x=0.1, y=2, labels=toString(round(bp$stats[3,2] * 100, digits=2)))
+title(paste("% Patient Dropout rate by use of Universal IV \n n=", sum(dropout$Dropouts), sep=""))
 
 ```
+
 
 
 ```{r IV-2, fig.height=5, fig.cap="TODO: Caption this figure."}
