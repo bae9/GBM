@@ -38,7 +38,7 @@ dropout <- dropout %>%
         ,Reason = as.factor(Reason)
         )
 
-dropout <- dropout[dropout$Reason != "None",]
+dropout <- dropout[dropout$Reason == "Adverse Event" | dropout$Reason == "Withdrawal by Subject",]
 dropoutsum <- dropout %>%
   group_by(NCT, Arm) %>%
     summarize(Sum = sum(Dropouts, na.rm=FALSE))
