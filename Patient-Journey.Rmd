@@ -38,7 +38,7 @@ dropout <- dropout %>%
         ,Reason = as.factor(Reason)
         )
 
-dropout <- dropout[dropout$Reason == "Withdrawal by Subject",]
+dropout <- dropout[dropout$Reason == "Withdrawal by Subject" | dropout$Reason == "Patient Refusal" | dropout$Reason == "Study Compliance",]
 dropoutsum <- dropout %>%
   group_by(NCT, Arm) %>%
     summarize(Sum = sum(Dropouts, na.rm=FALSE))
@@ -56,19 +56,22 @@ stopifnot(all(!duped$duped))
 
 ## Patient Burden
 
-```{r patient-Burden, fig.height=5, fig.cap="**TODO:** Caption figure."}
+```{r patient-burden, fig.height=5, fig.cap="**TODO:** Caption figure."}
 #create data frames for combination
 df_sum <- data.frame(dropoutsum$Arm, dropoutsum$Sum)
 df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$Burden, arms$Recurrent)
 
-#combine data frames
+#combine data frames / make percent
 combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
+percent <- combo$dropoutsum.Sum / combo$arms.Enrollment
 
 #sort y axis
 combo$arms.Burden <- fct_relevel(combo$arms.Burden, "Low", "Medium", "High")
 
 #build charts
-bwplot(combo$dropoutsum.Sum / combo$arms.Enrollment ~ combo$arms.Burden, add=TRUE)
+bxp <- ggplot(data = combo, aes(y=percent, x=arms.Burden, fill=arms.Burden)) + geom_boxplot() + coord_flip() + labs(title="Dropout by Patient Burden", x="Burden Level", y="% of Patient Dropout", fill="Burden") + geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5)
+
+bxp
 
 
 ```
