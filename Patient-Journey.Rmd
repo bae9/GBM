@@ -54,9 +54,9 @@ arm_names_unique <- all(!duped$duped)
 stopifnot(all(!duped$duped))
 ```
 
-## Patient Burden
+## Patient Burden (Blake)
 
-```{r patient-burden, fig.height=5, fig.cap="**TODO:** Caption figure."}
+```{r patient-burden, fig.height=5, fig.cap="Burden is based on the combination of these factors: % Serious Adverse Events, % Non Serious Adverse Events, use of IV, use of radiation, & use of surgery."}
 #create data frames for combination
 df_sum <- data.frame(dropoutsum$Arm, dropoutsum$Sum)
 df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$Burden, arms$Recurrent)
@@ -68,14 +68,40 @@ percent <- combo$dropoutsum.Sum / combo$arms.Enrollment
 #sort y axis
 combo$arms.Burden <- fct_relevel(combo$arms.Burden, "Low", "Medium", "High")
 
-#build charts
-bxp <- ggplot(data = combo, aes(y=percent, x=arms.Burden, fill=arms.Burden)) + geom_boxplot() + coord_flip() + labs(title="Dropout by Patient Burden", x="Burden Level", y="% of Patient Dropout", fill="Burden") + geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5)
+#build chart
+bxp <- ggplot(data = combo, aes(y=percent, x=arms.Burden, fill=arms.Burden)) + geom_boxplot() + coord_flip() 
 
+bxp <- bxp + labs(title="Dropout by Patient Burden", x="Burden Level", y="% of Patient Dropout", fill="Burden")
+bxp <- bxp + scale_y_continuous(limits=c(0,.5))
+bxp <- bxp + geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5)
 bxp
 
 
 ```
+## Patient Burden (Emily)
 
+```{r patient-burden-emily, fig.height=5, fig.cap="**TODO**"}
+#create data frames for combination
+df_sum <- data.frame(dropoutsum$Arm, dropoutsum$Sum)
+df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$BurdenTwo, arms$Recurrent)
+
+#combine data frames / make percent
+combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
+percent <- combo$dropoutsum.Sum / combo$arms.Enrollment
+
+#sort y axis
+combo$arms.BurdenTwo <- fct_relevel(combo$arms.BurdenTwo, "Low", "Medium", "High")
+
+#build chart
+bxp <- ggplot(data = combo, aes(y=percent, x=arms.BurdenTwo, fill=arms.BurdenTwo)) + geom_boxplot() + coord_flip() 
+
+bxp <- bxp + labs(title="Dropout by Patient Burden", x="Burden Level", y="% of Patient Dropout", fill="Burden")
+bxp <- bxp + scale_y_continuous(limits=c(0,.5))
+bxp <- bxp + geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5)
+bxp
+
+
+```
 
 <!--
 This is just a trivial addition by DCN, to check whether we've
