@@ -135,6 +135,25 @@ title("Patient Dropout % by Burden Level")
 
 ```
 
+```{r crosstab-alpha}
+# Notice that, as currently coded, the Burden factors are unordered,
+# and therefore sort alphabetically by default:
+kable(xtabs(~ Burden + BurdenTwo, data=arms))
+```
+
+```{r crosstab-ordered}
+# By defining Burden as an explicitly *ordered* factor, however,
+# you can tell R some crucial 'background knowledge' about the
+# proper interpretation and representation of these factors:
+subtler <- arms %>%
+  mutate(
+    BurdenB = ordered(Burden, levels=c("Low","Medium","High"))
+   ,BurdenE = ordered(BurdenTwo, levels=c("Low","Medium","High"))
+   )
+
+kable(xtabs(~ BurdenB + BurdenE, data=subtler))
+```
+
 <!--
 This is just a trivial addition by DCN, to check whether we've
 got the CRLF-vs-CR issue sorted out. Also, it demonstrates the
