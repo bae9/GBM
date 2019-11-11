@@ -1,7 +1,7 @@
 ---
 title: "GBM Patient Journey"
 author: "Blake Easton"
-date: "10/31/2019"
+date: "11/11/2019"
 output: html_document
 ---
 
@@ -69,13 +69,29 @@ percent <- combo$dropoutsum.Sum / combo$arms.Enrollment
 combo$arms.Burden <- fct_relevel(combo$arms.Burden, "Low", "Medium", "High")
 
 #build chart
-bxp <- ggplot(data = combo, aes(y=percent, x=arms.Burden, fill=arms.Burden)) + geom_boxplot() + coord_flip() 
+bxp <- boxplot(percent ~ combo$arms.Burden, 
+        horizontal = TRUE,
+        xlab = "% of Patient Dropouts",
+        col = "grey"
+        )
 
-bxp <- bxp + labs(title="Dropout by Patient Burden", x="Burden Level", y="% of Patient Dropout", fill="Burden")
-bxp <- bxp + scale_y_continuous(limits=c(0,.5))
-bxp <- bxp + geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5)
-bxp
+stripchart(percent ~ combo$arms.Burden, 
+          add = TRUE,
+          pch = 20,
+          method = "jitter",
+          col = "blue"
+          )
 
+#format text
+low <- format(round(bxp$stats[3,1], 2), nsmall = 2)
+medium <- format(round(bxp$stats[3,2], 2), nsmall = 2)
+high <- format(round(bxp$stats[3,3], 2), nsmall = 2)
+
+#add text
+text(x=0.1, y=1, labels=low)
+text(x=0.15, y=2, labels=medium)
+text(0.32, y=3, labels=high)
+title("Patient Dropout % by Burden Level")
 
 ```
 ## Patient Burden (Emily)
@@ -93,13 +109,29 @@ percent <- combo$dropoutsum.Sum / combo$arms.Enrollment
 combo$arms.BurdenTwo <- fct_relevel(combo$arms.BurdenTwo, "Low", "Medium", "High")
 
 #build chart
-bxp <- ggplot(data = combo, aes(y=percent, x=arms.BurdenTwo, fill=arms.BurdenTwo)) + geom_boxplot() + coord_flip() 
+bxp <- boxplot(percent ~ combo$arms.Burden, 
+        horizontal = TRUE,
+        xlab = "% of Patient Dropouts",
+        col = "grey"
+        )
 
-bxp <- bxp + labs(title="Dropout by Patient Burden", x="Burden Level", y="% of Patient Dropout", fill="Burden")
-bxp <- bxp + scale_y_continuous(limits=c(0,.5))
-bxp <- bxp + geom_dotplot(binaxis='y', stackdir='center', dotsize=0.5)
-bxp
+stripchart(percent ~ combo$arms.Burden, 
+          add = TRUE,
+          pch = 20,
+          method = "jitter",
+          col = "blue"
+          )
 
+#format text
+low <- format(round(bxp$stats[3,1], 2), nsmall = 2)
+medium <- format(round(bxp$stats[3,2], 2), nsmall = 2)
+high <- format(round(bxp$stats[3,3], 2), nsmall = 2)
+
+#add text
+text(x=0.15, y=1, labels=low)
+text(x=0.315, y=2, labels=medium)
+text(0.30, y=3, labels=high)
+title("Patient Dropout % by Burden Level")
 
 ```
 
