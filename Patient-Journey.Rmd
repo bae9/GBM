@@ -38,7 +38,7 @@ dropout <- dropout %>%
         ,Reason = as.factor(Reason)
         )
 
-dropout <- dropout[dropout$Reason == "Withdrawal by Subject" | dropout$Reason == "Patient Refusal" | dropout$Reason == "Study Compliance",]
+dropout <- dropout[dropout$Reason == "Withdrawal by Subject" | dropout$Reason == "Patient Refusal" | dropout$Reason == "Study Compliance" | dropout$Reason == "Protocol Violation",]
 dropoutsum <- dropout %>%
   group_by(NCT, Arm) %>%
     summarize(Sum = sum(Dropouts, na.rm=FALSE))
@@ -72,7 +72,8 @@ combo$arms.Burden <- fct_relevel(combo$arms.Burden, "Low", "Medium", "High")
 bxp <- boxplot(percent ~ combo$arms.Burden, 
         horizontal = TRUE,
         xlab = "% of Patient Dropouts",
-        col = "grey"
+        col = "grey",
+        notch=FALSE
         )
 
 stripchart(percent ~ combo$arms.Burden, 
@@ -88,9 +89,9 @@ medium <- format(round(bxp$stats[3,2], 2), nsmall = 2)
 high <- format(round(bxp$stats[3,3], 2), nsmall = 2)
 
 #add text
-text(x=0.1, y=1, labels=low)
-text(x=0.15, y=2, labels=medium)
-text(0.32, y=3, labels=high)
+text(x=0.3, y=1, labels=low)
+text(x=0.3, y=2, labels=medium)
+text(0.3, y=3, labels=high)
 title("Patient Dropout % by Burden Level")
 
 ```
@@ -128,9 +129,9 @@ medium <- format(round(bxp$stats[3,2], 2), nsmall = 2)
 high <- format(round(bxp$stats[3,3], 2), nsmall = 2)
 
 #add text
-text(x=0.15, y=1, labels=low)
-text(x=0.315, y=2, labels=medium)
-text(0.30, y=3, labels=high)
+text(x=0.3, y=1, labels=low)
+text(x=0.3, y=2, labels=medium)
+text(0.3, y=3, labels=high)
 title("Patient Dropout % by Burden Level")
 
 ```
