@@ -84,14 +84,14 @@ stripchart(percent ~ combo$arms.Burden,
           )
 
 #format text
-low <- format(round(bxp$stats[3,1], 2), nsmall = 2)
-medium <- format(round(bxp$stats[3,2], 2), nsmall = 2)
-high <- format(round(bxp$stats[3,3], 2), nsmall = 2)
+low <- format(round(bxp$stats[3,1], 3), nsmall = 1)
+medium <- format(round(bxp$stats[3,2], 3), nsmall = 1)
+high <- format(round(bxp$stats[3,3], 3), nsmall = 1)
 
 #add text
-text(x=0.3, y=1, labels=low)
-text(x=0.3, y=2, labels=medium)
-text(0.3, y=3, labels=high)
+text(x=0.32, y=1, labels=low)
+text(x=0.32, y=2, labels=medium)
+text(0.32, y=3, labels=high)
 title("Patient Dropout % by Burden Level")
 
 ```
@@ -124,14 +124,14 @@ stripchart(percent ~ combo$arms.Burden,
           )
 
 #format text
-low <- format(round(bxp$stats[3,1], 2), nsmall = 2)
-medium <- format(round(bxp$stats[3,2], 2), nsmall = 2)
-high <- format(round(bxp$stats[3,3], 2), nsmall = 2)
+low <- format(round(bxp$stats[3,1], 3), nsmall = 2)
+medium <- format(round(bxp$stats[3,2], 3), nsmall = 2)
+high <- format(round(bxp$stats[3,3], 3), nsmall = 2)
 
 #add text
-text(x=0.3, y=1, labels=low)
-text(x=0.3, y=2, labels=medium)
-text(0.3, y=3, labels=high)
+text(x=0.32, y=1, labels=low)
+text(x=0.32, y=2, labels=medium)
+text(0.32, y=3, labels=high)
 title("Patient Dropout % by Burden Level")
 
 ```
