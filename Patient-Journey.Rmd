@@ -80,7 +80,7 @@ combo <- scale(combo)
 
 #build graph
 k2 <- kmeans(combo[], centers = 3, nstart=25)
-fviz_cluster(k2, data=combo)
+fviz_cluster(k2, data=combo, repel=TRUE, labelsize = 5)
 
 
 
