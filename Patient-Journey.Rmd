@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ---
 title: "GBM Patient Journey"
 author: "Blake Easton"
@@ -67,21 +66,27 @@ stopifnot(all(!duped$duped))
 ```{r patient-burden, fig.height=5, fig.cap="Burden is based on the combination of these factors: % Serious Adverse Events, % Non Serious Adverse Events, use of IV, use of radiation, & use of surgery."}
 #create data frames for combination
 df_sum <- data.frame(dropoutsum$Arm, dropoutsum$Sum)
-df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$Burden, arms$Recurrent)
+df_arm <- data.frame(arms$Arm, arms$Enrollment)
 
-#combine data frames / make percent
+#combine data frames
 combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
-percent <- combo$dropoutsum.Sum / combo$arms.Enrollment
 
-#scale dataframe and convert
-combo <- sapply(combo, as.numeric)
-combo[is.na(combo)] <- 0
+#scale data
+combo$dropoutsum.Sum <- as.numeric(as.factor(combo$dropoutsum.Arm))
+combo$dropoutsum.Sum <- as.numeric(as.factor(combo$dropoutsum.Sum))
+rownames(combo) = combo$dropoutsum.Arm
+combo$dropoutsum.Arm = NULL
 combo <- scale(combo)
 
-#build cluster plot
-k2 <- kmeans(combo, centers = 3, nstart=25)
+#build graph
+k2 <- kmeans(combo[], centers = 3, nstart=25)
 fviz_cluster(k2, data=combo)
 
+#compute gap statistic
+set.seed(123)
+gap_stat <- clusGap(combo, FUN = kmeans, nstart = 25,
+                    K.max = 10, B = 50)
+fviz_gap_stat(gap_stat)
 
 
 ```
@@ -128,209 +133,3 @@ title("Patient Dropout % by Burden Level")
 
 
 
-=======
----
-title: "GBM Patient Journey"
-author: "Blake Easton"
-date: "11/11/2019"
-output: html_document
----
-
-```{r setup, include=FALSE}
-library(Hmisc)
-library(tidyverse)
-library(readxl)
-library(knitr)
-library(kableExtra)
-library(dplyr)
-library(magrittr)
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## Data Prep
-
-```{r data-prep}
-path <- "variable-dosing_7119.xlsx"
-studies <- read_excel(path, sheet="Studies")
-arms <- read_excel(path, sheet="Arms")
-dropout <- read_excel(path, sheet="Dropout")
-
-studies <- studies %>%
-  mutate(NCT = as.factor(NCT))
-
-arms <- arms %>%
-  mutate(NCT = as.factor(NCT)
-        ,Arm = as.factor(Arm)
-        )
-
-dropout <- dropout %>%
-  mutate(NCT = as.factor(NCT)
-        ,Arm = as.factor(Arm)
-        ,Reason = as.factor(Reason)
-        )
-
-dropout <- dropout[dropout$Reason == "Withdrawal by Subject" | dropout$Reason == "Patient Refusal" | dropout$Reason == "Study Compliance" | dropout$Reason == "Protocol Violation",]
-dropoutsum <- dropout %>%
-  group_by(NCT, Arm) %>%
-    summarize(Sum = sum(Dropouts, na.rm=FALSE))
-```
-
-## Integrity Checks
-```{r integrity-checks}
-stopifnot(nlevels(dropout$Arm) == nlevels(arms$Arm))
-duped <- dropout %>%
-  group_by(Arm) %>%
-  summarize(duped = length(unique(NCT)) > 1)
-arm_names_unique <- all(!duped$duped)
-stopifnot(all(!duped$duped))
-```
-
-## Patient Burden (Blake)
-
-```{r patient-burden, fig.height=5, fig.cap="Burden is based on the combination of these factors: % Serious Adverse Events, % Non Serious Adverse Events, use of IV, use of radiation, & use of surgery."}
-#create data frames for combination
-df_sum <- data.frame(dropoutsum$Arm, dropoutsum$Sum)
-df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$Burden, arms$Recurrent)
-
-#combine data frames / make percent
-combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
-percent <- combo$dropoutsum.Sum / combo$arms.Enrollment
-
-#sort y axis
-combo$arms.Burden <- fct_relevel(combo$arms.Burden, "Low", "Medium", "High")
-
-#build chart
-bxp <- boxplot(percent ~ combo$arms.Burden, 
-        horizontal = TRUE,
-        xlab = "% of Patient Dropouts",
-        col = "grey",
-        notch=FALSE
-        )
-
-stripchart(percent ~ combo$arms.Burden, 
-          add = TRUE,
-          pch = 20,
-          method = "jitter",
-          col = "blue"
-          )
-
-#format text
-low <- format(round(bxp$stats[3,1], 3), nsmall = 1)
-medium <- format(round(bxp$stats[3,2], 3), nsmall = 1)
-high <- format(round(bxp$stats[3,3], 3), nsmall = 1)
-
-#add text
-text(x=0.32, y=1, labels=low)
-text(x=0.32, y=2, labels=medium)
-text(0.32, y=3, labels=high)
-title("Patient Dropout % by Burden Level")
-
-```
-## Patient Burden (Emily)
-
-```{r patient-burden-emily, fig.height=5, fig.cap="**TODO**"}
-#create data frames for combination
-df_sum <- data.frame(dropoutsum$Arm, dropoutsum$Sum)
-df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$BurdenTwo, arms$Recurrent)
-
-#combine data frames / make percent
-combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
-percent <- combo$dropoutsum.Sum / combo$arms.Enrollment
-
-#sort y axis
-combo$arms.BurdenTwo <- fct_relevel(combo$arms.BurdenTwo, "Low", "Medium", "High")
-
-#build chart
-bxp <- boxplot(percent ~ combo$arms.Burden, 
-        horizontal = TRUE,
-        xlab = "% of Patient Dropouts",
-        col = "grey"
-        )
-
-stripchart(percent ~ combo$arms.Burden, 
-          add = TRUE,
-          pch = 20,
-          method = "jitter",
-          col = "blue"
-          )
-
-#format text
-low <- format(round(bxp$stats[3,1], 3), nsmall = 2)
-medium <- format(round(bxp$stats[3,2], 3), nsmall = 2)
-high <- format(round(bxp$stats[3,3], 3), nsmall = 2)
-
-#add text
-text(x=0.32, y=1, labels=low)
-text(x=0.32, y=2, labels=medium)
-text(0.32, y=3, labels=high)
-title("Patient Dropout % by Burden Level")
-
-```
-
-```{r crosstab-alpha}
-# Notice that, as currently coded, the Burden factors are unordered,
-# and therefore sort alphabetically by default:
-kable(xtabs(~ Burden + BurdenTwo, data=arms))
-```
-
-```{r crosstab-ordered}
-# By defining Burden as an explicitly *ordered* factor, however,
-# you can tell R some crucial 'background knowledge' about the
-# proper interpretation and representation of these factors:
-subtler <- arms %>%
-  mutate(
-    BurdenB = ordered(Burden, levels=c("Low","Medium","High"))
-   ,BurdenE = ordered(BurdenTwo, levels=c("Low","Medium","High"))
-   )
-
-kable(xtabs(~ BurdenB + BurdenE, data=subtler))
-```
-
-<!--
-This is just a trivial addition by DCN, to check whether we've
-got the CRLF-vs-CR issue sorted out. Also, it demonstrates the
-syntax for a comment outside of a code chunk.
--->
-
-```{r IV-2, fig.height=5, fig.cap="TODO: Caption this figure."}
-# Demonstrating a customary pattern of statistical work,
-# in which we create an 'analysis dataset' that 'denormalizes'
-# the input data.
-# Normalization serves crucially important data-integrity aims,
-# but these hinder analysis.
-#
-# To get an analysis dataset suitable for the contrasts
-# you explored in the 2 boxplots, we need the following
-# functional dependencies represented within each row
-# of our analysis table:
-# (1) Arm --> Enrollment
-# (2) Arm -- Dropouts (of a certain kind)
-# (3) Arm --> Universal IV (T/F)
-# NB1: Because we asserted that the Arm names are unique,
-#      we don't need to 'supplement' our key with NCT #'s.
-#      (The Arm column alone suffices as a unique key.)
-# NB2: Being selective about which columns to retain
-#      in the analysis dataset will help make the tables
-#      easier to list at the console and to keep track of
-#      mentally. But in general, we might normally retain
-#      all of the columns of -arms- in such work.
-
-wc <- arms %>% # 'Withdrew Consent'
-  select(Arm, Enrollment, "Universal IV") %>% # see NB2 above
-  left_join(select(dropout, -NCT), by="Arm") %>% # see NB1 above
-  mutate(WC = Reason %in% c("Withdrawal by Subject"
-                           ,"Study Compliance"
-                           ,"Lost to Follow-up" # TODO: Discuss whether to include this.
-                           ,"Patient Refusal"
-                           ) # Note WC is a *logical* (T/F) var at this point...
-        ,Route = factor(`Universal IV`, levels=c(TRUE,FALSE), labels=c("IV", "PO"))
-        ) %>%
-  group_by(Arm, Route, Enrollment) %>%
-  summarize(WC = sum(WC)) # ...but sum() converts WC to a count of TRUE's.
-
-# This plot uses the 'trellis graphics' https://en.wikipedia.org/wiki/Small_multiple
-# provided by R's lattice library. Notice how it achieves a direct and transparent
-# display of your data, on Tufte's principle, "Above all else, show the data."
-xyplot(WC ~ Enrollment | Route, data=wc)
-```
->>>>>>> 697476f0cc58ef7c66825e7cc898a9f953a019c5
