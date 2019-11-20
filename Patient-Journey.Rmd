@@ -82,11 +82,6 @@ combo <- scale(combo)
 k2 <- kmeans(combo[], centers = 3, nstart=25)
 fviz_cluster(k2, data=combo)
 
-#compute gap statistic
-set.seed(123)
-gap_stat <- clusGap(combo, FUN = kmeans, nstart = 25,
-                    K.max = 10, B = 50)
-fviz_gap_stat(gap_stat)
 
 
 ```
