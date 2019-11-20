@@ -2,7 +2,9 @@
 title: "GBM Patient Journey"
 author: "Blake Easton"
 date: "11/11/2019"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -13,6 +15,8 @@ library(knitr)
 library(kableExtra)
 library(dplyr)
 library(magrittr)
+library(cluster)
+library(factoextra)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -37,6 +41,9 @@ dropout <- dropout %>%
         ,Arm = as.factor(Arm)
         ,Reason = as.factor(Reason)
         )
+
+
+
 
 dropout <- dropout[dropout$Reason == "Withdrawal by Subject" | dropout$Reason == "Patient Refusal" | dropout$Reason == "Study Compliance",]
 dropoutsum <- dropout %>%
@@ -65,33 +72,16 @@ df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$Burden, arms$Recurrent)
 combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
 percent <- combo$dropoutsum.Sum / combo$arms.Enrollment
 
-#sort y axis
-combo$arms.Burden <- fct_relevel(combo$arms.Burden, "Low", "Medium", "High")
+#scale dataframe and convert
+combo <- sapply(combo, as.numeric)
+combo[is.na(combo)] <- 0
+combo <- scale(combo)
 
-#build chart
-bxp <- boxplot(percent ~ combo$arms.Burden, 
-        horizontal = TRUE,
-        xlab = "% of Patient Dropouts",
-        col = "grey"
-        )
+#build cluster plot
+k2 <- kmeans(combo, centers = 3, nstart=25)
+fviz_cluster(k2, data=combo)
 
-stripchart(percent ~ combo$arms.Burden, 
-          add = TRUE,
-          pch = 20,
-          method = "jitter",
-          col = "blue"
-          )
 
-#format text
-low <- format(round(bxp$stats[3,1], 2), nsmall = 2)
-medium <- format(round(bxp$stats[3,2], 2), nsmall = 2)
-high <- format(round(bxp$stats[3,3], 2), nsmall = 2)
-
-#add text
-text(x=0.1, y=1, labels=low)
-text(x=0.15, y=2, labels=medium)
-text(0.32, y=3, labels=high)
-title("Patient Dropout % by Burden Level")
 
 ```
 ## Patient Burden (Emily)
@@ -135,50 +125,5 @@ title("Patient Dropout % by Burden Level")
 
 ```
 
-<!--
-This is just a trivial addition by DCN, to check whether we've
-got the CRLF-vs-CR issue sorted out. Also, it demonstrates the
-syntax for a comment outside of a code chunk.
--->
 
-```{r IV-2, fig.height=5, fig.cap="TODO: Caption this figure."}
-# Demonstrating a customary pattern of statistical work,
-# in which we create an 'analysis dataset' that 'denormalizes'
-# the input data.
-# Normalization serves crucially important data-integrity aims,
-# but these hinder analysis.
-#
-# To get an analysis dataset suitable for the contrasts
-# you explored in the 2 boxplots, we need the following
-# functional dependencies represented within each row
-# of our analysis table:
-# (1) Arm --> Enrollment
-# (2) Arm -- Dropouts (of a certain kind)
-# (3) Arm --> Universal IV (T/F)
-# NB1: Because we asserted that the Arm names are unique,
-#      we don't need to 'supplement' our key with NCT #'s.
-#      (The Arm column alone suffices as a unique key.)
-# NB2: Being selective about which columns to retain
-#      in the analysis dataset will help make the tables
-#      easier to list at the console and to keep track of
-#      mentally. But in general, we might normally retain
-#      all of the columns of -arms- in such work.
 
-wc <- arms %>% # 'Withdrew Consent'
-  select(Arm, Enrollment, "Universal IV") %>% # see NB2 above
-  left_join(select(dropout, -NCT), by="Arm") %>% # see NB1 above
-  mutate(WC = Reason %in% c("Withdrawal by Subject"
-                           ,"Study Compliance"
-                           ,"Lost to Follow-up" # TODO: Discuss whether to include this.
-                           ,"Patient Refusal"
-                           ) # Note WC is a *logical* (T/F) var at this point...
-        ,Route = factor(`Universal IV`, levels=c(TRUE,FALSE), labels=c("IV", "PO"))
-        ) %>%
-  group_by(Arm, Route, Enrollment) %>%
-  summarize(WC = sum(WC)) # ...but sum() converts WC to a count of TRUE's.
-
-# This plot uses the 'trellis graphics' https://en.wikipedia.org/wiki/Small_multiple
-# provided by R's lattice library. Notice how it achieves a direct and transparent
-# display of your data, on Tufte's principle, "Above all else, show the data."
-xyplot(WC ~ Enrollment | Route, data=wc)
-```
