@@ -3,7 +3,6 @@ title: "GBM Patient Journey"
 author: "Blake Easton"
 date: "11/11/2019"
 output:
-  pdf_document: default
   html_document: default
 ---
 
@@ -66,7 +65,7 @@ stopifnot(all(!duped$duped))
 ```{r patient-burden, fig.height=5, fig.cap="Burden is based on the combination of these factors: % Serious Adverse Events, % Non Serious Adverse Events, use of IV, use of radiation, & use of surgery."}
 #create data frames for combination
 df_sum <- data.frame(dropoutsum$Arm, dropoutsum$Sum)
-df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$`Universal IV`, arms$Radiation, arms$Surgery, arms$SOC, arms$Randomized, arms$Concomitant, arms$Adjuvant, arms$Recurrent)
+df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$`Universal IV`, arms$Radiation, arms$Surgery, arms$SOC, arms$Concomitant, arms$Adjuvant, arms$Recurrent)
 
 #combine data frames
 combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
@@ -75,6 +74,7 @@ combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
 rownames(combo) = combo$dropoutsum.Arm
 combo$percent = combo$dropoutsum.Sum / combo$arms.Enrollment
 combo$dropoutsum.Arm = NULL
+
 combo <- na.omit(combo)
 combo <- scale(combo)
 
@@ -92,14 +92,7 @@ combok <- merge(combo, dfk, by=0)
 percent <- combok$dropoutsum.Sum / combok$arms.Enrollment
 
 #build boxplot
-boxplot(percent ~ combok$k2.cluster)
-
-
-
-
-
-
-
+bwplot(combok$k2.cluster ~ percent)
 
 ```
 ## Patient Burden (Emily)
