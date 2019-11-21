@@ -66,21 +66,38 @@ stopifnot(all(!duped$duped))
 ```{r patient-burden, fig.height=5, fig.cap="Burden is based on the combination of these factors: % Serious Adverse Events, % Non Serious Adverse Events, use of IV, use of radiation, & use of surgery."}
 #create data frames for combination
 df_sum <- data.frame(dropoutsum$Arm, dropoutsum$Sum)
-df_arm <- data.frame(arms$Arm, arms$Enrollment)
+df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$`Universal IV`, arms$Radiation, arms$Surgery, arms$SOC, arms$Randomized, arms$Concomitant, arms$Adjuvant, arms$Recurrent)
 
 #combine data frames
 combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
 
 #scale data
-combo$dropoutsum.Sum <- as.numeric(as.factor(combo$dropoutsum.Arm))
-combo$dropoutsum.Sum <- as.numeric(as.factor(combo$dropoutsum.Sum))
 rownames(combo) = combo$dropoutsum.Arm
+combo$percent = combo$dropoutsum.Sum / combo$arms.Enrollment
 combo$dropoutsum.Arm = NULL
+combo <- na.omit(combo)
 combo <- scale(combo)
 
-#build graph
-k2 <- kmeans(combo[], centers = 4, nstart=25)
+#build cluster graph
+k2 <- kmeans(combo, centers = 3, nstart=25)
 fviz_cluster(k2, data=combo, repel=TRUE, labelsize = 5)
+
+#utilize k2 data / format
+dfk <- data.frame(k2$cluster)
+combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
+combo <- na.omit(combo)
+rownames(combo) = combo$dropoutsum.Arm
+
+combok <- merge(combo, dfk, by=0)
+percent <- combok$dropoutsum.Sum / combok$arms.Enrollment
+
+#build boxplot
+boxplot(percent ~ combok$k2.cluster)
+
+
+
+
+
 
 
 
