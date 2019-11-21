@@ -79,7 +79,7 @@ combo$dropoutsum.Arm = NULL
 combo <- scale(combo)
 
 #build graph
-k2 <- kmeans(combo[], centers = 3, nstart=25)
+k2 <- kmeans(combo[], centers = 4, nstart=25)
 fviz_cluster(k2, data=combo, repel=TRUE, labelsize = 5)
 
 
