@@ -62,28 +62,26 @@ stopifnot(all(!duped$duped))
 
 ## Patient Burden (Blake)
 
-```{r patient-burden, fig.height=5, fig.cap="Burden is based on the combination of these factors: % Serious Adverse Events, % Non Serious Adverse Events, use of IV, use of radiation, & use of surgery."}
-#create data frames for combination
-df_sum <- data.frame(dropoutsum$Arm, dropoutsum$Sum)
-df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$`Universal IV`, arms$Radiation, arms$Surgery, arms$SOC, arms$Concomitant, arms$Adjuvant, arms$Recurrent)
-
-#combine data frames
-combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
+```{r patient-burden, fig.height=5, fig.cap="TODO"}
+#create data frame for kmeans
+df_arm <- data.frame(arms$`Universal IV`, arms$Radiation, arms$Surgery, arms$SOC, arms$Recurrent, arms$Arm)
 
 #scale data
-rownames(combo) = combo$dropoutsum.Arm
-combo$percent = combo$dropoutsum.Sum / combo$arms.Enrollment
-combo$dropoutsum.Arm = NULL
+rownames(df_arm) = df_arm$arms.Arm
+df_arm$arms.Arm = NULL
 
-combo <- na.omit(combo)
-combo <- scale(combo)
+df_arm <- na.omit(df_arm)
+df_arm <- scale(df_arm)
 
 #build cluster graph
-k2 <- kmeans(combo, centers = 3, nstart=25)
-fviz_cluster(k2, data=combo, repel=TRUE, labelsize = 5)
+k2 <- kmeans(df_arm, centers = 3, nstart=25, algorithm ="Forgy")
+fviz_cluster(k2, data=df_arm, repel=TRUE, labelsize = 7)
 
 #utilize k2 data / format
 dfk <- data.frame(k2$cluster)
+
+df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$`Universal IV`, arms$Radiation, arms$Surgery, arms$SOC, arms$Concomitant, arms$Adjuvant, arms$Recurrent)
+df_sum <- data.frame(dropoutsum$Arm, dropoutsum$Sum)
 combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
 combo <- na.omit(combo)
 rownames(combo) = combo$dropoutsum.Arm
