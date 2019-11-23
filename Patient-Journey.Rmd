@@ -1,7 +1,7 @@
 ---
 title: "GBM Patient Journey"
 author: "Blake Easton"
-date: "11/11/2019"
+date: "`r Sys.Date()`"
 output:
   html_document: default
 ---
@@ -74,6 +74,7 @@ df_arm <- na.omit(df_arm)
 df_arm <- scale(df_arm)
 
 #build cluster graph
+set.seed(2019) # ensure reproducible cluster numbering
 k2 <- kmeans(df_arm, centers = 3, nstart=25, algorithm ="Forgy")
 fviz_cluster(k2, data=df_arm, repel=TRUE, labelsize = 7)
 
@@ -93,6 +94,55 @@ percent <- combok$dropoutsum.Sum / combok$arms.Enrollment
 bwplot(combok$k2.cluster ~ percent)
 
 ```
+## A deep dive into the cluster analysis
+
+The `k2` cluster object is a list, with a number of components. The first of these, `k2$centers`, helps us to appreciate how the clustering algorithm has partitioned your data:
+
+```{r cluster-constrasts, echo=TRUE, results='verbatim'}
+ctrs <- round(k2$centers, 1) # rounding avoids distraction by excessive detail
+rownames(ctrs) <- paste("Cluster", 1:3)
+kable(ctrs) 
+```
+
+
+From the columns of this table, we can see that Surgery is the distinctive feature of Cluster 2, while Cluster 1 is marked by absence of both Radiation and SOC, and the presence of Recurrent disease. (Specifically, observe that all three column vectors are close to $\pm(-1,1,1)$.)
+
+This suggests that these three attributes do not contribute independent information that discriminates between the arms. Why this is so may be appreciated by noting these almost perfectly diagonal cross-tabulations:
+
+```{r Rads_SOC}
+xtabs(~ SOC + Radiation, data=arms)
+```
+
+```{r Recurrent_SOC}
+xtabs(~ SOC + !Recurrent, data=arms)
+```
+
+```{r Rads_Recurrent}
+xtabs(~ Radiation + !Recurrent, data=arms)
+```
+
+Another way to appreciate these facts is by cross-tabulating the cluster designations against each of these facts independently:
+
+```{r cluster_Recurrent}
+xtabs(~ k2$cluster + arms$Recurrent)
+```
+
+```{r cluster_Radiation}
+xtabs(~ k2$cluster + arms$Radiation)
+```
+
+```{r cluster_SOC}
+xtabs(~ k2$cluster + arms$SOC)
+```
+
+Finally, we ought to note how the `Universal IV` factor cross-tabulates against these clusters:
+
+```{r cluster_UnivIV}
+xtabs(~ k2$cluster + arms$`Universal IV`)
+```
+
+This crosstab helps explain the column vector $(0.0, -0.9, 0.1)$ for `Universal IV` in the `k2$centers` table, as reflecting the approximate balance on this variable within each of clusters 1 and 3.
+
 ## Patient Burden (Emily)
 
 ```{r patient-burden-emily, fig.height=5, fig.cap="**TODO**"}
