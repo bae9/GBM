@@ -21,3 +21,5 @@
 *.Rmd	text
 *.R  	text
 
+# Avoid thrashing Patient-Journey.Rmd CRLF <--> LF
+Patient-Journey.Rmd -text
