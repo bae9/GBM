@@ -143,6 +143,28 @@ xtabs(~ k2$cluster + arms$`Universal IV`)
 
 This crosstab helps explain the column vector $(0.0, -0.9, 0.1)$ for `Universal IV` in the `k2$centers` table, as reflecting the approximate balance on this variable within each of clusters 1 and 3.
 
+## Sample correspondence analysis
+
+Might some of these close factor alignments have emerged from a multiple correspondence analysis?
+
+```{r MCA-prep}
+# Prepare data frame for MCA
+mca_df <- arms %>%
+  mutate(
+    Recur = factor(Recurrent, levels=c(T,F), labels=c("Recurrent","NewlyDxed"))
+  , Burden = ordered(Burden, levels=c("Low","Medium","High"))
+  , UnivIV = factor(`Universal IV`, levels=c(T,F), labels=c("IV","Oral"))
+  , SOC = factor(SOC, levels=c(T,F), labels=c("SOC","notSOC"))
+  , Rads = factor(Radiation, levels=c(T,F), labels=c("Rads","noRads"))
+  )
+```
+
+```{r MCA, fig.cap="Multiple correspondence analysis (MCA) for several key design factors of the study arms. The close clustering of radiation, standard-of-care (SOC) and newly-diagnosed indicates that these design features strongly correlate, and likewise with the complementary features. Interestingly, the Oral-IV dichotomy seems orthogonal to these other features. Oral medication and low burden (as graded) appear related."}
+library(ca)
+mca <- mjca(mca_df[,c("Recur","Burden","UnivIV","SOC","Rads")])
+plot(mca, collabels="level", map="rowgreen", mass=TRUE)
+```
+
 ## Patient Burden (Emily)
 
 ```{r patient-burden-emily, fig.height=5, fig.cap="**TODO**"}
