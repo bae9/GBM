@@ -41,13 +41,24 @@ dropout <- dropout %>%
         ,Reason = as.factor(Reason)
         )
 
+# Here's a more uniform & reliable way to calculate dropout rates by arm
+dropout <- dropout %>%
+  mutate(burden_related = Reason %in% c("Withdrawal by Subject"
+                                       ,"Patient Refusal"
+                                       ,"Study Compliance")) %>%
+  group_by(NCT,Arm) %>%
+  summarize(brDropout = sum(Dropouts * burden_related)) # NB: logical multiplies like {0,1}
 
+# At this point, 'dropout' has 46 rows -- one for each arm.
+# We can then join the arm enrollments, and calculate brDropoutPercent:
+dropout <- dropout %>%
+  left_join(arms[,c("NCT","Arm","Enrollment","Burden","BurdenTwo")], by=c("NCT","Arm")) %>%
+  mutate(brDropoutRate = brDropout / Enrollment)
 
+# We may as well unify 'dropout' with 'arms' at this point, for simplicity:
+arms <- arms %>% left_join(dropout[,c("NCT","Arm","brDropout","brDropoutRate")]
+                           , by=c("NCT","Arm"))
 
-dropout <- dropout[dropout$Reason == "Withdrawal by Subject" | dropout$Reason == "Patient Refusal" | dropout$Reason == "Study Compliance",]
-dropoutsum <- dropout %>%
-  group_by(NCT, Arm) %>%
-    summarize(Sum = sum(Dropouts, na.rm=FALSE))
 ```
 
 ## Integrity Checks
@@ -64,34 +75,23 @@ stopifnot(all(!duped$duped))
 
 ```{r patient-burden, fig.height=5, fig.cap="TODO"}
 #create data frame for kmeans
-df_arm <- data.frame(arms$`Universal IV`, arms$Radiation, arms$Surgery, arms$SOC, arms$Recurrent, arms$Arm)
-
-#scale data
-rownames(df_arm) = df_arm$arms.Arm
-df_arm$arms.Arm = NULL
-
-df_arm <- na.omit(df_arm)
-df_arm <- scale(df_arm)
+df_arm <- data.frame(select(arms, `Universal IV`, Radiation, Surgery, SOC, Recurrent))
+rownames(df_arm) <- arms$Arm
 
 #build cluster graph
 set.seed(2019) # ensure reproducible cluster numbering
-k2 <- kmeans(df_arm, centers = 3, nstart=25, algorithm ="Forgy")
+k2 <- kmeans(scale(df_arm), centers = 3, nstart=25, algorithm ="Forgy")
 fviz_cluster(k2, data=df_arm, repel=TRUE, labelsize = 7)
 
-#utilize k2 data / format
-dfk <- data.frame(k2$cluster)
+# #utilize k2 data / format
+# NB: k2$cluster is now a *named* integer vector
+#     with names perfectly aligned with arms$Arm,
+#     so that we may easily attach it to 'arms':
+stopifnot(all(arms$Arm == names(k2$cluster)))
+arms$cluster <- k2$cluster
 
-df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$`Universal IV`, arms$Radiation, arms$Surgery, arms$SOC, arms$Concomitant, arms$Adjuvant, arms$Recurrent)
-df_sum <- data.frame(dropoutsum$Arm, dropoutsum$Sum)
-combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
-combo <- na.omit(combo)
-rownames(combo) = combo$dropoutsum.Arm
-
-combok <- merge(combo, dfk, by=0)
-percent <- combok$dropoutsum.Sum / combok$arms.Enrollment
-
-#build boxplot
-bwplot(combok$k2.cluster ~ percent)
+# #build boxplot
+bwplot(cluster ~ (100*brDropoutRate), data=arms)
 
 ```
 ## A deep dive into the cluster analysis
@@ -169,24 +169,15 @@ plot(mca, collabels="level", map="rowgreen", mass=TRUE)
 
 ```{r patient-burden-emily, fig.height=5, fig.cap="**TODO**"}
 #create data frames for combination
-df_sum <- data.frame(dropoutsum$Arm, dropoutsum$Sum)
-df_arm <- data.frame(arms$Arm, arms$Enrollment, arms$BurdenTwo, arms$Recurrent)
-
-#combine data frames / make percent
-combo <- full_join(df_sum, df_arm, by = c("dropoutsum.Arm" = "arms.Arm" ))
-percent <- combo$dropoutsum.Sum / combo$arms.Enrollment
-
-#sort y axis
-combo$arms.BurdenTwo <- fct_relevel(combo$arms.BurdenTwo, "Low", "Medium", "High")
 
 #build chart
-bxp <- boxplot(percent ~ combo$arms.Burden, 
+bxp <- boxplot(100*brDropoutRate ~ Burden, data=arms,
         horizontal = TRUE,
         xlab = "% of Patient Dropouts",
         col = "grey"
         )
 
-stripchart(percent ~ combo$arms.Burden, 
+stripchart(brDropoutRate ~ Burden, data=arms,
           add = TRUE,
           pch = 20,
           method = "jitter",
