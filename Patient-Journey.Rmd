@@ -59,6 +59,10 @@ dropout <- dropout %>%
 arms <- arms %>% left_join(dropout[,c("NCT","Arm","brDropout","brDropoutRate")]
                            , by=c("NCT","Arm"))
 
+#build dropout rate col
+arms$brDropoutLabel <- ifelse(arms$brDropoutRate == 0, "LowDrop",
+                              ifelse(arms$brDropoutRate < 0.07692307, "MedDrop", "HighDrop"))
+
 ```
 
 ## Integrity Checks
@@ -71,7 +75,7 @@ arm_names_unique <- all(!duped$duped)
 stopifnot(all(!duped$duped))
 ```
 
-## Patient Burden (Blake)
+## Cluster Analysis
 
 ```{r patient-burden, fig.height=5, fig.cap="TODO"}
 #create data frame for kmeans
@@ -156,12 +160,14 @@ mca_df <- arms %>%
   , UnivIV = factor(`Universal IV`, levels=c(T,F), labels=c("IV","Oral"))
   , SOC = factor(SOC, levels=c(T,F), labels=c("SOC","notSOC"))
   , Rads = factor(Radiation, levels=c(T,F), labels=c("Rads","noRads"))
+  , Dropout = ordered(brDropoutLabel, levels=c("LowDrop", "MedDrop", "HighDrop"))
   )
 ```
 
 ```{r MCA, fig.cap="Multiple correspondence analysis (MCA) for several key design factors of the study arms. The close clustering of radiation, standard-of-care (SOC) and newly-diagnosed indicates that these design features strongly correlate, and likewise with the complementary features. Interestingly, the Oral-IV dichotomy seems orthogonal to these other features. Oral medication and low burden (as graded) appear related."}
+
 library(ca)
-mca <- mjca(mca_df[,c("Recur","Burden","UnivIV","SOC","Rads")])
+mca <- mjca(mca_df[,c("Recur","Burden","UnivIV","SOC","Rads","Dropout")])
 plot(mca, collabels="level", map="rowgreen", mass=TRUE)
 ```
 
