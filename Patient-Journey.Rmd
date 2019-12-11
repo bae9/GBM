@@ -60,6 +60,7 @@ arms <- arms %>% left_join(dropout[,c("NCT","Arm","brDropout","brDropoutRate")]
                            , by=c("NCT","Arm"))
 
 #build dropout rate col
+#split non zeros into two equal groups of 7
 arms$brDropoutLabel <- ifelse(arms$brDropoutRate == 0, "LowDrop",
                               ifelse(arms$brDropoutRate < 0.07692307, "MedDrop", "HighDrop"))
 
@@ -168,38 +169,8 @@ mca_df <- arms %>%
 
 library(ca)
 mca <- mjca(mca_df[,c("Recur","Burden","UnivIV","SOC","Rads","Dropout")])
-plot(mca, collabels="level", map="rowgreen", mass=TRUE)
+plot(mca, collabels="level", map="rowgreen", mass=TRUE, pch=18)
 ```
-
-## Patient Burden (Emily)
-
-```{r patient-burden-emily, fig.height=5, fig.cap="**TODO**"}
-#create data frames for combination
-
-#build chart
-bxp <- boxplot(100*brDropoutRate ~ Burden, data=arms,
-        horizontal = TRUE,
-        xlab = "% of Patient Dropouts",
-        col = "grey"
-        )
-
-stripchart(brDropoutRate ~ Burden, data=arms,
-          add = TRUE,
-          pch = 20,
-          method = "jitter",
-          col = "blue"
-          )
-
-#format text
-low <- format(round(bxp$stats[3,1], 2), nsmall = 2)
-medium <- format(round(bxp$stats[3,2], 2), nsmall = 2)
-high <- format(round(bxp$stats[3,3], 2), nsmall = 2)
-
-#add text
-text(x=0.15, y=1, labels=low)
-text(x=0.315, y=2, labels=medium)
-text(0.30, y=3, labels=high)
-title("Patient Dropout % by Burden Level")
 
 ```
 
