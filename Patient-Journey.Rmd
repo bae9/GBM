@@ -16,6 +16,7 @@ library(dplyr)
 library(magrittr)
 library(cluster)
 library(factoextra)
+library(FactoMineR)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -167,9 +168,12 @@ mca_df <- arms %>%
 
 ```{r MCA, fig.cap="Multiple correspondence analysis (MCA) for several key design factors of the study arms. The close clustering of radiation, standard-of-care (SOC) and newly-diagnosed indicates that these design features strongly correlate, and likewise with the complementary features. Interestingly, the Oral-IV dichotomy seems orthogonal to these other features. Oral medication and low burden (as graded) appear related."}
 
-library(ca)
-mca <- mjca(mca_df[,c("Recur","Burden","UnivIV","SOC","Rads","Dropout")])
-plot(mca, collabels="level", map="rowgreen", mass=TRUE, pch=18)
+mca <- MCA(mca_df[,c("Recur","Burden","UnivIV","SOC","Rads","Dropout")], graph=FALSE)
+fviz_mca_var(mca.res,
+                repel=TRUE,
+                col.circle = "blue",
+                ggtheme = theme_minimal())
+
 ```
 
 ```
