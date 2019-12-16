@@ -99,7 +99,7 @@ arms$cluster <- k2$cluster
 
  
 # #build boxplot
-bwplot((100*brDropoutRate) ~ ordered(Burden,levels=c("Low","Medium","High"))  |  factor(Recurrent,labels=c("Newly Diagnosed","Recurrent")), data=arms, ylab="Dropout %", panel = function(x,y, ...){
+bwplot((100*brDropoutRate) ~ ordered(Burden,levels=c("Low","Medium","High"))  |  factor(Recurrent,labels=c("Newly Diagnosed","Recurrent")), data=arms, ylab="Withdrawal by Participant, Participant Refusal, Nonadherence", panel = function(x,y, ...){
   panel.bwplot(x, y, fill="grey", ...)
   panel.xyplot(x, y, col="red", jitter = TRUE, ...)
 }) 
