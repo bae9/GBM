@@ -96,8 +96,9 @@ fviz_cluster(k2, data=df_arm, repel=TRUE, labelsize = 7)
 stopifnot(all(arms$Arm == names(k2$cluster)))
 arms$cluster <- k2$cluster
 
+ 
 # #build boxplot
-bwplot(cluster ~ (100*brDropoutRate), data=arms)
+bwplot(factor(Recurrent,labels=c("NewlyDx","Recurrent")) ~ (100*brDropoutRate) |  ordered(Burden,levels=c("Low","Medium","High")), data=arms, xlab="Dropout %", horizontal = TRUE)
 
 ```
 ## A deep dive into the cluster analysis
@@ -169,7 +170,7 @@ mca_df <- arms %>%
 ```{r MCA, fig.cap="Multiple correspondence analysis (MCA) for several key design factors of the study arms. The close clustering of radiation, standard-of-care (SOC) and newly-diagnosed indicates that these design features strongly correlate, and likewise with the complementary features. Interestingly, the Oral-IV dichotomy seems orthogonal to these other features. Oral medication and low burden (as graded) appear related."}
 
 mca <- MCA(mca_df[,c("Recur","Burden","UnivIV","SOC","Rads","Dropout")], graph=FALSE)
-fviz_mca_var(mca.res,
+fviz_mca_var(mca,
                 repel=TRUE,
                 col.circle = "blue",
                 ggtheme = theme_minimal())
