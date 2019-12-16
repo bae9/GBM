@@ -98,7 +98,7 @@ arms$cluster <- k2$cluster
 
  
 # #build boxplot
-bwplot(factor(Recurrent,labels=c("NewlyDx","Recurrent")) ~ (100*brDropoutRate) |  ordered(Burden,levels=c("Low","Medium","High")), data=arms, xlab="Dropout %", horizontal = TRUE)
+bwplot(factor(Recurrent,labels=c("Newly Diagnosed","Recurrent")) ~ (100*brDropoutRate) |  ordered(Burden,levels=c("Low","Medium","High")), data=arms, xlab="Dropout %", horizontal = TRUE)
 
 ```
 ## A deep dive into the cluster analysis
